@@ -1,8 +1,8 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "cert-2-aws-creds",
+  "version": "0.1.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "GitHub Action that retrieves temporary AWS credentials using X.509 certificate",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -10,17 +10,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/ThinkThenRant/cert-2-aws-creds.git"
   },
   "keywords": [
     "actions",
     "node",
     "setup"
   ],
-  "author": "YourNameOrOrganization",
+  "author": "Yenlin Chen (hencrice@)",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ThinkThenRant/cert-2-aws-creds/issues"
+  },
+  "homepage": "https://github.com/ThinkThenRant/cert-2-aws-creds#readme",
   "dependencies": {
-    "@actions/core": "^1.0.0"
+    "@actions/core": "^1.0.0",
+    "aws-sdk": "^2.568.0"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",

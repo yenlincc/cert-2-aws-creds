@@ -9,7 +9,7 @@ Parameters:
       The ARN of the certificate you will use with the
       cert2awscreds GitHub Action.
     Type: String
-  
+
   GitHubRepositoryName:
     Description: >-
       The name of the GitHub repository you are provisioning
@@ -18,7 +18,7 @@ Parameters:
       https://github.com/ThinkThenRant/cert-2-aws-creds, so
       the repository name would be "cert-2-aws-creds".
     Type: String
-  
+
   WorkflowDuration:
     Description: >-
       The amount of time in seconds that the temporary credentials need to be valid for.
@@ -28,7 +28,7 @@ Parameters:
     # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
     MinValue: 3600
     MaxValue: 43200
-  
+
   ManagedPolicies:
     Description: >-
       A list of managed policies (separated by comma) to be specified
@@ -41,7 +41,7 @@ Outputs:
   RoleArnForGitHubAction:
     Description: >-
       The ARN that will be assumed by the cert-2-aws-creds GitHub Action
-    Value: !GetAtt ActionRole.Arn 
+    Value: !GetAtt ActionRole.Arn
 
 Resources:
   ActionRole:
@@ -78,14 +78,14 @@ Resources:
           - Effect: Allow
             Action:
               - 'iot:AssumeRoleWithCertificate'
-            Resource: !Sub 
+            Resource: !Sub
               - 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:rolealias/${Name}'
               # replace the forward slash, '/',  with '@'.
               - {Name: !Join ['@', !Split ['/', !Ref GitHubRepositoryName]]}
-  
+
   AttachPolicyToCert:
     # Attach the policy to an existing cert provided by the customer
     Type: AWS::IoT::PolicyPrincipalAttachment
-    Properties: 
+    Properties:
       PolicyName: !Ref ActionCertPolicy
       Principal: !Ref CertificateArn

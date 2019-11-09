@@ -1,11 +1,13 @@
-name: "Test typescript-action"
+name: "Test cert-2-aws-creds Action"
 on:
   pull_request:
   push:
     branches:
       - master
       - 'releases/*'
-
+env:
+  CERTIFICATE: ${{ secrets.CERTIFICATE }}
+  PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
 jobs:
   test:
     runs-on: ubuntu-latest
