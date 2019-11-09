@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  This template deploys the resources to support the
+  cert2awscreds GitHub Action.
+
+Parameters:
+  CertificateArn:
+    Description: >-
+      The ARN of the certificate you will use with the
+      cert2awscreds GitHub Action.
+    Type: String
+  
+  GitHubRepositoryName:
+    Description: >-
+      The name of the GitHub repository you are provisioning
+      the cert2awscreds action with. For example, the
+      cert2awscreds action is hosted on
+      https://github.com/ThinkThenRant/cert-2-aws-creds, so
+      the repository name would be "ThinkThenRant/cert-2-aws-creds".
+    Type: String
+  
+  WorkflowDuration:
+    Description: >-
+      The amount of time in seconds that the temporary credentials need to be valid for.
+    Type: Number
+    Default: 3600
+    # determined by the `MaxSessionDuration` on
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+    MinValue: 3600
+    MaxValue: 43200
+  
+  ManagedPolicies:
+    Description: >-
+      A list of managed policies (separated by comma) to be specified
+      by the user and usable with the temporary credentials returned
+      from this GitHub Action.
+    Type: CommaDelimitedList
+    Default: 'arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess'
+
+Resources:
+  ActionRole:
+    # This is the IAM role that will be used by the GitHub Action.
+    # The temporary credentials are generated after AWS IoT service
+    # assume this role on the Action's behalf.
+    Type: AWS::IAM::Role
+    Properties:
+      Description: The IAM role used by the cert-2-creds GitHub Action
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: credentials.iot.amazonaws.com
+      # A list of managed policies to be specified by the user and usable
+      # with the temporary credentials returned from this GitHub Action
+      ManagedPolicyArns: !Ref ManagedPolicies
+      MaxSessionDuration: !Ref WorkflowDuration
+      Path: /GitHubActionCert2Creds/
+      # User can create additional policies if needed
+      # Policies:
+      #   - Policy
+
+  ActionCertPolicy:
+    # create the cert policy and let users attach it themselves
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyDocument:
+        # https://docs.aws.amazon.com/iot/latest/developerguide/authorizing-direct-aws.html
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'iot:AssumeRoleWithCertificate'
+            Resource: !Sub 
+              - 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:rolealias/${Name}'
+              - {Name: !Ref GitHubRepositoryName}
+  
+  AttachPolicyToCert:
+    # Attach the policy to an existing cert provided by the customer
+    Type: AWS::IoT::PolicyPrincipalAttachment
+    Properties: 
+      PolicyName: !Ref ActionCertPolicy
+      Principal: !Ref CertificateArn
