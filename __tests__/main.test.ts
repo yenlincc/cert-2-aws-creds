@@ -1,8 +1,14 @@
-import {extractValue} from '../src/inputValidation'
-import {downloadAmazonCA} from '../src/downloadCA'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
+import * as process from 'process';
+import * as cp from 'child_process';
+import * as path from 'path';
+
+import * as core from '@actions/core';
+import STS from 'aws-sdk/clients/sts';
+import { AWSError } from 'aws-sdk/lib/error';
+
+import {extractValue} from '../src/inputValidation';
+import {downloadAmazonCA} from '../src/downloadCA';
+import {getTempCreds} from '../src/getTempCreds';
 
 test('extract defined value', async() => {
     let ok = 'ok';
@@ -41,12 +47,26 @@ rqXRfboQnoZsG4q5WTP468SQvvG5
     expect(actual).toBe(expectedCA);
 });
 
-// // shows how the runner will run a javascript action with env / stdout protocol
-// test('test runs', () => {
-//     process.env['INPUT_MILLISECONDS'] = '500';
-//     const ip = path.join(__dirname, '..', 'lib', 'main.js');
-//     const options: cp.ExecSyncOptions = {
-//         env: process.env
-//     };
-//     console.log(cp.execSync(`node ${ip}`, options).toString());
-// });
+test('retrieve temporary credentials', async() => {
+    const certificate = core.getInput('certificate', {required: true});
+    const private_key = core.getInput('private_key', {required: true});
+    const iot_endpoint = core.getInput('iot_endpoint', {required: true});
+    const role_alias = core.getInput('aws_iot_role_alias', {required: true});
+    const ca = await downloadAmazonCA();
+    const tmpCreds = await getTempCreds(
+        iot_endpoint, role_alias, ca, certificate, private_key,
+    )
+    expect(tmpCreds.accessKeyId).toBeTruthy();
+    expect(tmpCreds.secretAccessKey).toBeTruthy();
+    expect(tmpCreds.sessionToken).toBeTruthy();
+
+    let sts = new STS({
+        accessKeyId: tmpCreds.accessKeyId,
+        secretAccessKey: tmpCreds.secretAccessKey,
+        sessionToken: tmpCreds.sessionToken,
+    })
+
+    sts.getCallerIdentity((err: AWSError, data:STS.GetCallerIdentityResponse) => {
+        expect(err).toBeFalsy();
+    });
+});
