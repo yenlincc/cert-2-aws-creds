@@ -18,7 +18,7 @@ export function downloadAmazonCA(): Promise<string> {
 
             // Collect response body data.
             incomingMessage.on('data', chunk => {
-                response.body + chunk;
+                response.body = response.body + chunk;
             });
 
             // Resolve on end.

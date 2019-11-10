@@ -1,7 +1,6 @@
 import * as process from 'process'
 
 import * as core from '@actions/core';
-import IoT from 'aws-sdk/clients/iot'
 
 import {downloadAmazonCA} from './downloadCA';
 import {extractValue} from './inputValidation';
@@ -13,12 +12,14 @@ async function run() {
     const certificate = core.getInput('certificate', {required: true});
     const private_key = core.getInput('private_key', {required: true});
     const iot_endpoint = core.getInput('iot_endpoint', {required: true});
-    console.log(`Using certificate: ${certificate}`)
-    console.log(`Using endpoint: ${iot_endpoint}`)
+    const role_alias = core.getInput('aws_iot_role_alias', {required: true});
+    core.debug(`Using certificate: ${certificate}`);
+    core.debug(`Using endpoint: ${iot_endpoint}`);
+    core.debug(`Using role_alias: ${role_alias}`);
 
     let ca = await downloadAmazonCA();
     let tempCreds = await getTempCreds(
-      iot_endpoint, ca, certificate, private_key,
+      iot_endpoint, role_alias, ca, certificate, private_key,
     );
 
     core.setOutput('aws_access_key_id', tempCreds.accessKeyId);

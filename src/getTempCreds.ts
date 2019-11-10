@@ -22,11 +22,11 @@ export interface TemporaryCreds {
 /** getTempCreds retrieves the temporary credentials.
  */
 export function getTempCreds(
-    endpoint: string, ca: string,
+    endpoint: string, role_alias: string, ca: string,
     certificate: string, privateKey: string): Promise<TemporaryCreds> {
 
     return new Promise<TemporaryCreds>((resolve, reject) => {
-        let request = https.get(endpoint, {
+        let request = https.get('https://'+endpoint+'/role-aliases/'+role_alias+'/credentials', {
             ca: ca,
             key: privateKey,
             cert: certificate,
@@ -40,7 +40,7 @@ export function getTempCreds(
 
             // Collect response body data.
             incomingMessage.on('data', chunk => {
-                response.body + chunk;
+                response.body = response.body + chunk;
             });
 
             // Resolve on end.
