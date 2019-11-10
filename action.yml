@@ -28,20 +28,6 @@ inputs: # inputs to this Action
       and provisioned the action infrastructure Cloudformation stack
     required: true
 
-  aws_role_arn:
-    description: >-
-      The ARN of the AWS IAM role that should be assumed by
-      this GitHub Action. This should be one of the outputs
-      after the action infrastructure Cloudformation stack
-      is deployed
-    required: true
-
-  aws_region:
-    description: >-
-      The target AWS region this action will send requests to
-    required: false
-    default: us-west-2
-
 outputs: # output will be consumable in later steps in the Github Action workflow
   aws_access_key_id:
     description: >-
@@ -55,12 +41,6 @@ outputs: # output will be consumable in later steps in the Github Action workflo
     description: >-
       STS session token. Required to be used along with
       the other temporary cerdentials in this output
-  aws_region:
-    description: >-
-      The same aws region that was passed into this
-      action as input. Can be referenced by future steps
-      in the workflow so that region is hardcoded only once
-      in the input section of this action
 
 runs:
   using: node12
