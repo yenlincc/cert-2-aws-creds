@@ -19,15 +19,15 @@ Parameters:
       the repository name would be "cert-2-aws-creds".
     Type: String
 
-  WorkflowDuration:
+  CredentialDuration:
     Description: >-
       The amount of time in seconds that the temporary credentials need to be valid for.
     Type: Number
     Default: 3600
-    # determined by the `MaxSessionDuration` on
-    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
-    MinValue: 3600
-    MaxValue: 43200
+    # determined by the `credentialDurationSeconds` on
+    # https://docs.aws.amazon.com/iot/latest/apireference/API_CreateRoleAlias.html#API_CreateRoleAlias_RequestSyntax
+    MinValue: 900
+    MaxValue: 3600
 
   ManagedPolicies:
     Description: >-
@@ -38,10 +38,17 @@ Parameters:
     Default: 'arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess'
 
 Outputs:
-  RoleArnForGitHubAction:
+  RoleAlias:
     Description: >-
-      The ARN that will be assumed by the cert-2-aws-creds GitHub Action
-    Value: !GetAtt ActionRole.Arn
+      The name of the IoT role alias that is associated with the IAM
+      role that will be assumed by this GitHub Action.
+    Value: !GetAtt RoleAlias.Name
+
+  Endpoint:
+    Description: >-
+      The AWS account-specific IoT endpoint for retrieving temporary
+      credentials.
+    Value: !GetAtt TempCredsEndpoint.Endpoint
 
 Resources:
   ActionRole:
@@ -61,7 +68,7 @@ Resources:
       # A list of managed policies to be specified by the user and usable
       # with the temporary credentials returned from this GitHub Action
       ManagedPolicyArns: !Ref ManagedPolicies
-      MaxSessionDuration: !Ref WorkflowDuration
+      MaxSessionDuration: 3600 
       Path: /GitHubActionCert2Creds/
       # User can create additional policies if needed
       # Policies:
@@ -89,3 +96,195 @@ Resources:
     Properties:
       PolicyName: !Ref ActionCertPolicy
       Principal: !Ref CertificateArn
+
+  RoleAlias:
+    Type: Custom::RoleAlias
+    Properties:
+      ServiceToken: !GetAtt RoleAliasCreation.Arn
+      RoleAliasName: !Join ['@', !Split ['/', !Ref GitHubRepositoryName]]
+      ActionRoleArn: !GetAtt ActionRole.Arn
+      CredentialDuration: !Ref CredentialDuration
+
+  RoleAliasCreation:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: "index.lambda_handler"
+      Timeout: 30
+      Role: !GetAtt AliasCreationRole.Arn
+      Runtime: python3.7
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import sys
+
+          import boto3
+          import cfnresponse
+
+          logger = logging.getLogger()
+          out_hdlr = logging.StreamHandler(sys.stdout)
+          out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+          out_hdlr.setLevel(logging.INFO)
+          logger.addHandler(out_hdlr)
+          logger.setLevel(logging.INFO)
+
+          client = boto3.client('iot')
+
+          def lambda_handler(event, context):
+              logger.info('got event {}'.format(event))
+              responseData = {}
+
+              alias_name = event['ResourceProperties'].get('RoleAliasName')
+              role_arn = event['ResourceProperties'].get('ActionRoleArn')
+              credential_duration = int(event['ResourceProperties'].get('CredentialDuration'))
+
+              try:
+                  if event['RequestType'] == 'Create':
+                      resp = client.create_role_alias(
+                          roleAlias=alias_name,
+                          roleArn=role_arn,
+                          credentialDurationSeconds=credential_duration
+                      )
+                      responseData['Name'] = resp['roleAlias']
+                  elif event['RequestType'] == 'Update':
+                      resp = client.update_role_alias(
+                          roleAlias=alias_name,
+                          roleArn=role_arn,
+                          credentialDurationSeconds=credential_duration
+                      )
+                      responseData['Name'] = resp['roleAlias']
+                  else: # Delete
+                      resp = client.delete_role_alias(
+                          roleAlias=alias_name
+                      )
+                      responseData['Name'] = resp['roleAlias']
+              except Exception as e:
+                  logger.error('failed to create role alias, cause: %s', str(e))
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                  return
+
+              logger.info('responseData {}'.format(responseData))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+  AliasCreationRole:
+    Type: AWS::IAM::Role
+    DependsOn: ActionRole
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: 'AliasCreationRolePolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:PassRole
+                Resource:
+                  - !GetAtt ActionRole.Arn 
+              - Effect: Allow
+                Action:
+                  - iot:CreateRoleAlias
+                  - iot:DeleteRoleAlias
+                  - iot:UpdateRoleAlias
+                Resource:
+                  - !Sub
+                    - 'arn:aws:iot:${AWS::Region}:${AWS::AccountId}:rolealias/${Name}'
+                    # replace the forward slash, '/',  with '@'.
+                    - {Name: !Join ['@', !Split ['/', !Ref GitHubRepositoryName]]}
+
+# https://stackoverflow.com/questions/44588863/how-to-obtain-aws-iot-endpoint-url-from-within-a-cloudformation-template
+  TempCredsEndpoint:
+    Type: Custom::TempCredsEndpoint
+    Properties:
+      ServiceToken: !GetAtt DescribeCredsEndpoint.Arn
+
+  DescribeCredsEndpoint:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: "index.lambda_handler"
+      Timeout: 30
+      Role: !GetAtt DescribeCredsEndpointRole.Arn
+      Runtime: python3.7
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import sys
+          
+          import boto3
+          import cfnresponse
+
+          logger = logging.getLogger()
+          out_hdlr = logging.StreamHandler(sys.stdout)
+          out_hdlr.setFormatter(logging.Formatter('%(asctime)s %(message)s'))
+          out_hdlr.setLevel(logging.INFO)
+          logger.addHandler(out_hdlr)
+          logger.setLevel(logging.INFO)
+
+          client = boto3.client('iot')
+
+          def lambda_handler(event, context):
+              logger.info('got event {}'.format(event))
+              responseData = {}
+
+              try:
+                  resp = client.describe_endpoint(
+                    endpointType='iot:CredentialProvider'
+                  )
+                  responseData['Endpoint'] = resp['endpointAddress'] 
+              except Exception as e:
+                  logger.error('failed to describe endpoint, cause: %s', str(e))
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                  return
+
+              logger.info('responseData {}'.format(responseData))
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+  DescribeCredsEndpointRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: 'DescribeCredsEndpointRolePolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - "arn:aws:logs:*:*:*"
+              - Effect: Allow
+                Action:
+                  - iot:DescribeEndpoint
+                Resource: '*'
