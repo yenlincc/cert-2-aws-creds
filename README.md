@@ -1,4 +1,5 @@
-# Create a JavaScript Action using TypeScript
+# A GitHub Action that retrieves AWS STS temporary credentials using X.509 certificate
+![Build status]*https://github.com/ThinkThenRant/cert-2-aws-creds/workflows/UnitAndE2ETests/badge.svg "Status")
 
 Use this template to bootstrap the creation of a JavaScript action.:rocket:
 
