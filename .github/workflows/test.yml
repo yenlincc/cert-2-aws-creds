@@ -1,4 +1,4 @@
-name: "Test cert-2-aws-creds Action"
+name: "TestAction"
 on:
   pull_request:
   push:
