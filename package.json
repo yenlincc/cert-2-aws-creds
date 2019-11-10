@@ -25,7 +25,9 @@
   "homepage": "https://github.com/ThinkThenRant/cert-2-aws-creds#readme",
   "dependencies": {
     "@actions/core": "^1.0.0",
-    "aws-sdk": "^2.568.0"
+    "aws-sdk": "^2.568.0",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.8"
   },
   "devDependencies": {
     "@types/jest": "^24.0.13",

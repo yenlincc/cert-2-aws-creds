@@ -11,12 +11,23 @@ inputs: # inputs to this Action
       that will be used when making the call to AWS to retrieve
       temporary credentials
     required: true
+
   private_key:
     description: >-
       The private key (i.e. content of the file) generated
-      from the AWS IoT console. This key will be used when 
+      from the AWS IoT console. This key will be used when
       making the call to AWS to retrieve temporary credentials
     required: true
+
+  iot_endpoint:
+    description: >-
+      The AWS account-specific IoT endpoint for retrieving temporary
+      credentials. This can be obtained by running
+      `aws iot describe-endpoint ‐‐endpoint-type iot:CredentialProvider`
+      against the AWS region where you created your certificate
+      and provisioned the action infrastructure Cloudformation stack
+    required: true
+
   aws_role_arn:
     description: >-
       The ARN of the AWS IAM role that should be assumed by
@@ -24,6 +35,7 @@ inputs: # inputs to this Action
       after the action infrastructure Cloudformation stack
       is deployed
     required: true
+
   aws_region:
     description: >-
       The target AWS region this action will send requests to
@@ -47,7 +59,7 @@ outputs: # output will be consumable in later steps in the Github Action workflo
     description: >-
       The same aws region that was passed into this
       action as input. Can be referenced by future steps
-      in the workflow so that region is hardcoded only once 
+      in the workflow so that region is hardcoded only once
       in the input section of this action
 
 runs:
