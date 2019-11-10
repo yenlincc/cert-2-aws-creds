@@ -8,10 +8,13 @@ this Action uses a certificate that is trusted by AWS and the associated private
 ### IoT certificate creation
 The use of this action requires an one-time provision of AWS resources. First, head to the AWS console, choose IoT service and create a certificate under the "Secure" tab. The one-click solution should be the easiest:
 ![IoT Secure tab](imgs/iot_cert_creation_1.png)
+
 ![IoT 1-click certificate creation](imgs/iot_cert_creation_2.png)
 
 Download the generated certificate, private key (you can safely ignore the Amazon root CA and public key). Don't forget to click the "Activate" button, then click "Done". We don't have to attach any policy now because it will be taken care of in the next step.
 ![IoT cert download](imgs/iot_cert_creation_3.png)
+
+
 After the creation process completes, click on your certificate and jot down its ARN:
 ![IoT cert ARN](imgs/iot_cert_creation_4.png)
 
@@ -20,6 +23,7 @@ Head to the Cloudformation console, create a new stack with the provided templat
 
 After the stack successfully created, head to the Outputs tab and jot down the 2 outputs: "Endpoint" and "RoleAlias". Both will be used as inputs when this Action is added to your repository's workflow:
 ![CFN stack](imgs/cfn_stack.png)
+
 The stack also attaches an appropriate IoT policy to the certificate you provided as one of the stack parameters.
 
 ### Add the Action to your GitHub workflow
