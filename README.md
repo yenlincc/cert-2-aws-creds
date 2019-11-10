@@ -30,7 +30,7 @@ The stack also attaches an appropriate IoT policy to the certificate you provide
 Store the content of your certificate and private key as GitHub secrets:
 ![GitHub secrets](imgs/GitHub_secrets.png).
 
-Here is a sample of how to use this Action:
+Here is a sample usage of this Action:
 ```yaml
 name: Demo
 on:
@@ -77,4 +77,4 @@ jobs:
           aws sts get-caller-identity
 ```
 
-Check out the [demo](https://github.com/ThinkThenRant/cert-2-aws-creds-demo) repository which does does exactly this.
+Check out the [demo](https://github.com/ThinkThenRant/cert-2-aws-creds-demo) repository which does does exactly this. Enjoy!
