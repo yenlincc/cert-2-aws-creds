@@ -51,4 +51,4 @@ outputs: # output will be consumable in later steps in the Github Action workflo
 
 runs:
   using: node12
-  main: dist/index.js
+  main: lib/main.js
