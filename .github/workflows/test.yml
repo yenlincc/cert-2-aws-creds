@@ -8,7 +8,7 @@ on:
 env:
   INPUT_CERTIFICATE: ${{ secrets.CERTIFICATE }}
   INPUT_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-  INPUT_IOT_ENDPOINT: 'cf7kl723zk243.credentials.iot.us-west-2.amazonaws.com'
+  INPUT_IOT_ENDPOINT: ${{ secrets.IOT_ENDPOINT }}
   INPUT_AWS_IOT_ROLE_ALIAS: 'ThinkThenRant@cert-2-aws-creds'
 jobs:
   test:
