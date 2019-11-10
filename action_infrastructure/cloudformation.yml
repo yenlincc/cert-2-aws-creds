@@ -37,6 +37,12 @@ Parameters:
     Type: CommaDelimitedList
     Default: 'arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess'
 
+Outputs:
+  RoleArnForGitHubAction:
+    Description: >-
+      The ARN that will be assumed by the cert-2-aws-creds GitHub Action
+    Value: !GetAtt ActionRole.Arn 
+
 Resources:
   ActionRole:
     # This is the IAM role that will be used by the GitHub Action.
