@@ -1,4 +1,4 @@
-name: "TestAction"
+name: UnitAndE2ETests
 on:
   pull_request:
   push:
