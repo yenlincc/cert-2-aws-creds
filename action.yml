@@ -22,10 +22,17 @@ inputs: # inputs to this Action
   iot_endpoint:
     description: >-
       The AWS account-specific IoT endpoint for retrieving temporary
-      credentials. This can be obtained by running
-      `aws iot describe-endpoint ‐‐endpoint-type iot:CredentialProvider`
-      against the AWS region where you created your certificate
-      and provisioned the action infrastructure Cloudformation stack
+      credentials. This should be one of the outputs
+      after the action infrastructure Cloudformation stack
+      is deployed.
+    required: true
+
+  aws_iot_role_alias:
+    description: >-
+      The role alias created for the IAM role that will be assumed by
+      this GitHub Action. This should be one of the outputs
+      after the action infrastructure Cloudformation stack
+      is deployed.
     required: true
 
 outputs: # output will be consumable in later steps in the Github Action workflow
