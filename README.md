@@ -18,7 +18,7 @@ Download the generated certificate, private key (you can safely ignore the Amazo
 After the creation process completes, click on your certificate and jot down its ARN:
 ![IoT cert ARN](imgs/iot_cert_creation_4.png)
 
-### Remaining resources provisioning
+### Privision the remaining resources
 Head to the Cloudformation console, create a new stack with the provided template [here](action_infrastructure/cloudformation.yml). During the stack provisioning process, you'll have a chance to provide the certificate ARN and some other configurations, such as the GitHub repository you are adding this action to, as parameters to the stack.
 
 After the stack successfully created, head to the Outputs tab and jot down the 2 outputs: "Endpoint" and "RoleAlias". Both will be used as inputs when this Action is added to your repository's workflow:
