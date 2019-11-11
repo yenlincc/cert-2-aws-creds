@@ -2,6 +2,9 @@ name: cert-2-aws-creds
 author: Yenlin Chen (hencrice@)
 description: >-
   Retrieve temporary AWS credentials using X.509 certificate.
+branding:
+  icon: cloud
+  color: green
 
 inputs: # inputs to this Action
   certificate:
