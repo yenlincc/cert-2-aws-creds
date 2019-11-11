@@ -2,7 +2,6 @@ name: cert-2-aws-creds
 author: Yenlin Chen (hencrice@)
 description: >-
   Retrieve temporary AWS credentials using X.509 certificate.
-  Inspired by https://docs.aws.amazon.com/iot/latest/developerguide/authorizing-direct-aws.html.
 
 inputs: # inputs to this Action
   certificate:
