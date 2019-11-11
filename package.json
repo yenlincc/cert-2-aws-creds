@@ -6,7 +6,8 @@
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "release": "npm ci && npm run build && npm prune --production && sed -i '.bak' -e 's/^node_modules\\//# node_modules\\//g' .gitignore"
   },
   "repository": {
     "type": "git",
