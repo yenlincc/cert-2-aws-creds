@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: tmpCreds
-        uses: ThinkThenRant/cert-2-aws-creds@testrelease
+        uses: ThinkThenRant/cert-2-aws-creds@v0.1.1
         with:
             # The the X.509 certificate (i.e. content of the file)
             # that will be used when making the call to AWS to
