@@ -1,0 +1,11 @@
+version: 1
+update_configs:
+  - package_manager: "javascript"
+    directory: "/"
+    update_schedule: "live"
+    # Apply default reviewer and label to created
+    # pull requests
+    default_reviewers:
+      - "hencrice"
+    default_labels:
+      - "dependabot"
