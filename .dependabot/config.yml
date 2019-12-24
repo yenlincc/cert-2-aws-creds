@@ -7,5 +7,3 @@ update_configs:
     # pull requests
     default_reviewers:
       - "hencrice"
-    default_labels:
-      - "dependabot"
