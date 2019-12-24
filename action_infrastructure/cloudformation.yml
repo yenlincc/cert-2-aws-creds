@@ -16,7 +16,7 @@ Parameters:
       the cert2awscreds action with. For example, the
       cert2awscreds action is hosted on
       https://github.com/ThinkThenRant/cert-2-aws-creds, so
-      the repository name would be "cert-2-aws-creds".
+      the repository name would be "ThinkThenRant@cert-2-aws-creds".
     Type: String
 
   CredentialDuration:
