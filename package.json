@@ -28,7 +28,7 @@
     "@actions/core": "^1.2.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.9.0",
+    "@types/jest": "^24.9.1",
     "@types/node": "^13.5.0",
     "aws-sdk": "^2.610.0",
     "jest": "^24.9.0",
