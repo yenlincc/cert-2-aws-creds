@@ -25,7 +25,7 @@
   },
   "homepage": "https://github.com/ThinkThenRant/cert-2-aws-creds#readme",
   "dependencies": {
-    "@actions/core": "^1.2.2"
+    "@actions/core": "^1.2.3"
   },
   "devDependencies": {
     "@types/jest": "^25.1.3",
