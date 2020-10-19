@@ -30,7 +30,7 @@
   "devDependencies": {
     "@types/jest": "^25.2.1",
     "@types/node": "^13.11.1",
-    "aws-sdk": "^2.678.0",
+    "aws-sdk": "^2.773.0",
     "jest": "^25.3.0",
     "jest-circus": "^25.2.7",
     "ts-jest": "^25.3.1",
