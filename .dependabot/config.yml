@@ -1,9 +1,0 @@
-version: 1
-update_configs:
-  - package_manager: "javascript"
-    directory: "/"
-    update_schedule: "weekly"
-    # Apply default reviewer and label to created
-    # pull requests
-    default_reviewers:
-      - "hencrice"
